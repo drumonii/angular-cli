@@ -78,6 +78,35 @@ describe('augment-index-html', () => {
     `);
   });
 
+  it(`should emit correct script tags when having 'baseHref'`, async () => {
+    const source = augmentIndexHtml({
+      ...indexGeneratorOptions,
+      files: [
+        { file: 'styles.css', extension: '.css', name: 'styles' },
+        { file: 'runtime.js', extension: '.js', name: 'main' },
+        { file: 'main.js', extension: '.js', name: 'main' },
+        { file: 'runtime.js', extension: '.js', name: 'polyfills' },
+        { file: 'polyfills.js', extension: '.js', name: 'polyfills' },
+      ],
+      baseHref: '/some-url',
+    });
+
+    const html = await source;
+    expect(html).toEqual(oneLineHtml`
+      <html>
+        <head>
+          <base href="/some-url">
+          <link rel="stylesheet" href="styles.css">
+        </head>
+        <body>
+          <script src="runtime.js"></script>
+          <script src="polyfills.js"></script>
+          <script src="main.js"></script>
+        </body>
+      </html>
+    `);
+  });
+
   it(`should emit correct script tags when having 'module' and 'non-module' js`, async () => {
     const es2015JsFiles: FileInfo[] = [
       { file: 'runtime-es2015.js', extension: '.js', name: 'main' },
